@@ -1,4 +1,4 @@
-import { isAbsolute, relative, resolve } from "node:path";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 import type { Decision, ToolCall } from "./types.js";
 
 /**
@@ -24,7 +24,7 @@ const CATASTROPHIC: Array<[RegExp, string]> = [
   [/\bformat\s+[a-z]:/i, "Formats a Windows drive"],
 ];
 
-const SHELL_META = /[|;&<>`$(){}\\]/;
+const SHELL_META = /[\r\n|;&<>`$(){}\\]/;
 const SAFE_COMMANDS: RegExp[] = [
   /^(ls|dir|pwd|echo|head|tail|wc|which|where|whoami|date|tree|file|stat|du|df)(\s|$)/,
   /^cat\s+[\w./-]+$/,
@@ -49,7 +49,7 @@ export function touchesSecrets(call: ToolCall): boolean {
 export function isInsideProject(path: string, cwd: string | undefined): boolean {
   if (!cwd) return true;
   const rel = relative(resolve(cwd), resolve(cwd, path));
-  return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+  return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
 }
 
 const rule = (verdict: Decision["verdict"], reason: string): Decision => ({ verdict, layer: "rule", reason });
