@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [{ "type": "command", "command": "node ../hook/flinch-hook.mjs", "timeout": 30 }]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [{ "type": "command", "command": "node ../hook/flinch-hook.mjs", "timeout": 30 }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "WebFetch|WebSearch|Read|Bash|Grep|mcp__.*",
+        "hooks": [{ "type": "command", "command": "node ../hook/flinch-hook.mjs", "timeout": 30 }]
+      }
+    ]
+  }
+}
