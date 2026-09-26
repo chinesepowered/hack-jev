@@ -1,0 +1,25 @@
+{
+  "name": "flinch",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A System One reflex for coding agents: Jev checks every tool call in ~150ms, escalates only the unclear ones to an LLM.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "eval": "tsx scripts/eval.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "dependencies": {
+    "@typesafe-ai/sdk": "^0.6.0",
+    "openai": "^7.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
