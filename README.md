@@ -23,7 +23,7 @@ Flinch sits in the agent's hook points (`UserPromptSubmit`, `PreToolUse`, `PostT
 
 If anything is down, Flinch fails closed to "ask". A live dashboard shows every decision with its probabilities, latency and cost.
 
-**Measured with real keys:** 30/30 on our eval set; 50% of calls settled by rules, 47% by Jev, 3% by the LLM; Jev p50 138 ms, p95 224 ms; about **$0.02 per 1,000 tool calls**. In the Jev-vs-LLM race, Flinch judged 24 actions in **3.5 s** (22/24 correct) while an LLM judging every call took **14.9 s** (21/24), and both of Flinch's misses were cautious asks, never a bad allow.
+**Measured with real keys:** 30/30 on our eval set; 50% of calls settled by rules, 47% by Jev, 3% by the LLM; Jev p50 138 ms, p95 224 ms; about **$0.02 per 1,000 tool calls**. In the Jev-vs-LLM race (two live runs), Flinch judged the same 24 actions in **3.5 s** both times (22/24 correct) while an LLM judging every call took **7.8 s and 14.9 s** (21/24), and both of Flinch's misses were cautious asks, never a bad allow.
 
 ## Sponsor usage
 
@@ -69,4 +69,4 @@ GMI Cloud runs our System Two: the generative model that only sees the calls Jev
 - **OpenAI-compatible by design.** `src/llm.ts` uses the plain `openai` SDK pointed at `https://api.gmi-serving.com/v1` with `zai-org/GLM-5.3-Flash`, so moving to any other provider is an environment change (`LLM_BASE_URL`, `LLM_MODEL`), not a code change.
 - **Tuned for a guard.** `reasoning_effort: "low"` switches off GLM's long thinking, bringing verdicts to about 2.5 s; the model returns strict JSON (`verdict`, one-sentence `reason`), sees Jev's probabilities as context, and is told to treat the tool input as untrusted data. A timeout or bad answer falls back to "ask".
 - **Used sparingly.** Only 3% of eval calls reached it, which is the point: the expensive model is reserved for real ambiguity, like `rm -rf dist` when the user asked to clean the build output.
-- **Also the baseline.** The race's LLM-only lane sends every call to GLM on GMI, which is how we measured Flinch at 3.5 s versus 14.9 s for the same 24 actions.
+- **Also the baseline.** The race's LLM-only lane sends every call to GLM on GMI, which is how we measured Flinch at 3.5 s versus 7.8 to 14.9 s (two runs) for the same 24 actions.
