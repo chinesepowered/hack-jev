@@ -6,3 +6,5 @@ dist/
 data/
 *.log
 .DS_Store
+feedback.md
+demo-script.md
