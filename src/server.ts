@@ -4,10 +4,14 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { resolve } from "node:path";
 import { config } from "./config.js";
 import { check, scanContent, THRESHOLDS } from "./policy.js";
+import { runRace, type RaceCase } from "./race.js";
 import { getSession, goalFor, publish, recentEvents, recordPrompt, stats, subscribe, taint } from "./store.js";
 import type { FlinchEvent, ToolCall } from "./types.js";
 
 const dashboardPath = resolve(import.meta.dirname, "../public/index.html");
+const racePath = resolve(import.meta.dirname, "../public/race.html");
+const raceCasesPath = resolve(import.meta.dirname, "../fixtures/race-cases.json");
+let raceRunning = false;
 const CONTENT_TOOLS = /^(WebFetch|WebSearch|Read|Bash|Grep|mcp__.*)$/;
 
 function summarize(tool: string, input: Record<string, unknown>): string {
@@ -118,6 +122,44 @@ function send(res: ServerResponse, status: number, body: unknown, type = "applic
 const server = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");
   try {
+    // EventSource hides HTTP status codes. A HEAD probe lets the page explain a 409.
+    if (req.method === "HEAD" && url.pathname === "/api/race") {
+      res.setHeader("x-race-running", String(raceRunning));
+      return send(res, 204, "");
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/race") {
+      if (raceRunning) return send(res, 409, { error: "race already running" });
+      const cases: RaceCase[] = JSON.parse(readFileSync(raceCasesPath, "utf8"));
+      raceRunning = true;
+      res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store", connection: "keep-alive" });
+      res.write(": connected\n\n");
+      const emit = (event: unknown) => {
+        if (!res.destroyed) res.write(`data: ${JSON.stringify(event)}\n\n`);
+      };
+      const ping = setInterval(() => { if (!res.destroyed) res.write(": ping\n\n"); }, 15000);
+      try {
+        await runRace(cases, emit);
+        emit({ finished: true });
+      } catch (err) {
+        console.error("[flinch] race failed:", err);
+        emit({ error: "Race failed. Please try again." });
+      } finally {
+        clearInterval(ping);
+        // A disconnected viewer does not release the lock while judgments are in flight.
+        raceRunning = false;
+        res.end();
+      }
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/race") {
+      // Embed the shared fixture so tooltips and the race always use the same cases.
+      const cases = JSON.stringify(JSON.parse(readFileSync(raceCasesPath, "utf8"))).replaceAll("<", "\\u003c");
+      const html = readFileSync(racePath, "utf8").replace("<!-- RACE_CASES -->", () => cases);
+      return send(res, 200, html, "text/html; charset=utf-8");
+    }
+
     if (req.method === "POST" && url.pathname === "/hook") return send(res, 200, await handleHook(await readJson(req)));
 
     if (req.method === "POST" && url.pathname === "/api/simulate") {

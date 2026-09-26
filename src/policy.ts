@@ -1,3 +1,4 @@
+import type { JsonValue } from "@typesafe-ai/sdk";
 import { applyRules, isInsideProject, touchesSecrets } from "./rules.js";
 import { INJECTION_QUESTION, jev, jevCost, ON_TASK_QUESTION, RISK_QUESTIONS, RISK_SIGNALS, type RiskSignal } from "./jev.js";
 import { systemTwo } from "./llm.js";
@@ -41,19 +42,19 @@ export interface CheckResult {
 const since = (t: number) => Math.round(performance.now() - t);
 const verdict = (v: Decision["verdict"], reason: string): Decision => ({ verdict: v, layer: "jev", reason });
 
-function truncate(value: unknown, max = 2000): unknown {
+function truncate(value: unknown, max = 2000): JsonValue {
   if (typeof value === "string") return value.length > max ? `${value.slice(0, max)}... [truncated]` : value;
   if (Array.isArray(value)) return value.map((v) => truncate(v, max));
   if (value && typeof value === "object") {
     return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, truncate(v, max)]));
   }
-  return value;
+  return typeof value === "number" || typeof value === "boolean" ? value : null;
 }
 
 /** Small, relevant state only: Jev loses accuracy when the state is padded with unrelated detail. */
 function buildState(input: CheckInput) {
   const path = input.tool_input.file_path ?? input.tool_input.notebook_path ?? input.tool_input.path;
-  const facts: Record<string, unknown> = {};
+  const facts: Record<string, JsonValue> = {};
   if (typeof path === "string") facts.path_is_inside_project = isInsideProject(path, input.cwd);
   if (touchesSecrets(input)) facts.mentions_sensitive_path = true;
   return {
