@@ -86,8 +86,11 @@ input[type=checkbox] { accent-color:var(--green); width:17px; height:17px; flex-
 .feed-heading { margin-bottom:14px; }
 .feed-count { color:var(--muted); font-size:13px; font-weight:400; margin-left:10px; }
 .feed { overflow:hidden; }
-.feed-columns,.event-summary { display:grid; grid-template-columns:75px 82px minmax(100px,1fr) 85px 80px 140px 75px 80px 14px; gap:14px; align-items:center; padding:16px 22px; }
+.feed-columns,.event-summary { display:grid; grid-template-columns:75px 82px minmax(100px,1fr) 85px 80px 200px 75px 80px 14px; gap:14px; align-items:center; padding:16px 22px; }
 .feed-columns { color:var(--muted); font-size:11px; letter-spacing:1px; text-transform:uppercase; background:#171e2b; }
+.feed-signal-legend { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:2px 4px; margin-top:5px; font-size:11px; line-height:1.25; letter-spacing:0; text-transform:none; }
+.feed-signal-legend span { white-space:nowrap; }
+.mobile-signal-legend { display:none; }
 .event { border-top:1px solid var(--line); }
 .event-summary { list-style:none; cursor:pointer; font-size:13px; }
 .event-summary::-webkit-details-marker { display:none; }
@@ -113,9 +116,9 @@ dt { color:var(--muted); } dd { margin:0; overflow-wrap:anywhere; }
 .arrival { animation:arrival .22s ease-out; }
 @keyframes arrival { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
 footer { color:var(--muted); margin-top:20px; font-size:12px; display:flex; justify-content:space-between; gap:15px; }
-@media(min-width:1600px) { body { font-size:18px; } .event-summary { font-size:15px; } .chip,.field,.checkbox { font-size:15px; } .feed-columns,.event-summary { grid-template-columns:85px 90px minmax(100px,1fr) 90px 85px 180px 85px 90px 14px; } }
+@media(min-width:1600px) { body { font-size:18px; } .event-summary { font-size:15px; } .chip,.field,.checkbox { font-size:15px; } .feed-columns,.event-summary { grid-template-columns:85px 90px minmax(100px,1fr) 90px 85px 250px 85px 90px 14px; } }
 @media(max-width:1100px) { main { padding:24px; } .kpi { padding:18px; } .kpis { grid-template-columns:1fr 1.4fr 1.6fr; } .kpi:nth-child(3) { border-right:0; } .kpi:nth-child(n+4) { border-top:1px solid var(--line); } .feed-columns,.event-summary { grid-template-columns:65px 72px minmax(80px,1fr) 75px 65px 14px; gap:10px; } .feed-columns .optional,.event-summary>.optional { display:none; } }
-@media(max-width:650px) { main { padding:20px 14px 30px; } header { gap:14px; } h1 { font-size:30px; } .tagline { font-size:12px; } .header-meta { margin-left:0; width:100%; justify-content:space-between; } .kpis { grid-template-columns:1fr 1fr; } .kpi { padding:16px; } .kpi:nth-child(2) { border-right:0; } .kpi:nth-child(3) { grid-column:1/-1; border-top:1px solid var(--line); } .kpi-number { font-size:30px; } .verdict-counts { gap:16px; } .verdict-counts .kpi-number { font-size:23px; } .simulator,.verdict-card { padding:18px; } .section-heading { align-items:flex-start; } .section-heading p { font-size:12px; } .presets { gap:7px; } .chip { font-size:12px; padding:8px 9px; } .form-grid { grid-template-columns:1fr; gap:14px; } .form-footer { align-items:stretch; flex-direction:column; } .result-grid { grid-template-columns:1fr; gap:24px; } .verdict-placeholder { gap:14px; } .placeholder-icon { flex-shrink:0; width:40px; height:40px; } .verdict-placeholder h2 { font-size:18px; } .verdict-placeholder p { font-size:14px; } .feed-columns { display:none; } .event-summary { grid-template-columns:65px minmax(0,1fr) 75px 14px; gap:10px; padding:15px; } .event-text { grid-column:1/4; grid-row:2; } .event-summary>.badge { grid-column:2; grid-row:3; width:fit-content; } .event-summary>.optional { display:block; } .event-summary>.mini-signals,.event-summary>.injection,.event-summary>.no-model { grid-column:1/4; grid-row:4; } .event-summary>.mini-signals { display:flex; } .event-latency { grid-column:1; grid-row:3; } .event-cost { grid-column:3; grid-row:3; font-size:11px; } .event-summary::after { grid-column:4; grid-row:1; } .event-detail { grid-template-columns:1fr; margin:0 15px; } footer { flex-direction:column; } }
+@media(max-width:650px) { main { padding:20px 14px 30px; } header { gap:14px; } h1 { font-size:30px; } .tagline { font-size:12px; } .header-meta { margin-left:0; width:100%; justify-content:space-between; } .kpis { grid-template-columns:1fr 1fr; } .kpi { padding:16px; } .kpi:nth-child(2) { border-right:0; } .kpi:nth-child(3) { grid-column:1/-1; border-top:1px solid var(--line); } .kpi-number { font-size:30px; } .verdict-counts { gap:16px; } .verdict-counts .kpi-number { font-size:23px; } .simulator,.verdict-card { padding:18px; } .section-heading { align-items:flex-start; } .section-heading p { font-size:12px; } .presets { gap:7px; } .chip { font-size:12px; padding:8px 9px; } .form-grid { grid-template-columns:1fr; gap:14px; } .form-footer { align-items:stretch; flex-direction:column; } .result-grid { grid-template-columns:1fr; gap:24px; } .verdict-placeholder { gap:14px; } .placeholder-icon { flex-shrink:0; width:40px; height:40px; } .verdict-placeholder h2 { font-size:18px; } .verdict-placeholder p { font-size:14px; } .feed-columns { display:none; } .mobile-signal-legend { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px 8px; padding:12px 15px; color:var(--muted); background:#171e2b; font-size:12px; } .mobile-signal-legend span { white-space:nowrap; } .event-summary { grid-template-columns:65px minmax(0,1fr) 75px 14px; gap:10px; padding:15px; } .event-text { grid-column:1/4; grid-row:2; } .event-summary>.badge { grid-column:2; grid-row:3; width:fit-content; } .event-summary>.optional { display:block; } .event-summary>.mini-signals,.event-summary>.injection,.event-summary>.no-model { grid-column:1/4; grid-row:4; } .event-summary>.mini-signals { display:flex; } .event-latency { grid-column:1; grid-row:3; } .event-cost { grid-column:3; grid-row:3; font-size:11px; } .event-summary::after { grid-column:4; grid-row:1; } .event-detail { grid-template-columns:1fr; margin:0 15px; } footer { flex-direction:column; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } }
 </style>
 </head>
@@ -146,10 +149,10 @@ footer { color:var(--muted); margin-top:20px; font-size:12px; display:flex; just
       <p id="simulation-error" class="error" role="alert" hidden></p>
     </form>
   </section>
-  <section id="verdict" class="verdict-card panel" aria-label="Latest simulator result" aria-live="polite" aria-atomic="true"><div class="verdict-placeholder"><span class="placeholder-icon" aria-hidden="true">↳</span><div><h2>Every action gets a second look.</h2><p>Run a preset or try your own action to see Flinch’s decision.</p></div></div></section>
+  <section id="verdict" class="verdict-card panel" aria-label="Latest decision" aria-live="polite" aria-atomic="true"><div class="verdict-placeholder"><span class="placeholder-icon" aria-hidden="true">↳</span><div><h2>Every action gets a second look.</h2><p>Run a preset, try your own action, or watch a live hook decision.</p></div></div></section>
   <section aria-labelledby="feed-title">
     <div class="section-heading feed-heading"><h2 id="feed-title">Live feed <span class="feed-count" id="feed-count">0 events</span></h2><p>Newest first</p></div>
-    <div class="feed panel"><div class="feed-columns" aria-hidden="true"><span>Time</span><span>Tool</span><span>Action</span><span>Verdict</span><span>Layer</span><span class="optional">Signals</span><span class="optional">Latency</span><span class="optional">Cost</span><span></span></div><div id="events"></div><div class="empty" id="empty">Loading events…</div></div>
+    <div class="feed panel"><div class="feed-columns" aria-hidden="true"><span>Time</span><span>Tool</span><span>Action</span><span>Verdict</span><span>Layer</span><span class="optional">Signals<span class="feed-signal-legend"><span>1 destructive</span><span>2 secrets</span><span>3 exfiltration</span><span>4 remote code</span><span>5 tampering</span><span>6 on task</span></span></span><span class="optional">Latency</span><span class="optional">Cost</span><span></span></div><div class="mobile-signal-legend" aria-label="Signal bar order"><span>1 destructive</span><span>2 secrets</span><span>3 exfiltration</span><span>4 remote code</span><span>5 tampering</span><span>6 on task</span></div><div id="events"></div><div class="empty" id="empty">Loading events…</div></div>
   </section>
   <footer><span>Rules → Jev · System One → LLM · System Two</span><span>Fast decisions. A human when it matters.</span></footer>
 </main>
@@ -206,7 +209,7 @@ function layerBadge(layer) { return node('span', `badge ${layer}`, layers[layer]
 function signalBars(event, mini = false) {
   if (!Object.keys(event.signals).length) return node('span', 'no-model optional', 'no model call');
   const group = node('div', mini ? 'mini-signals optional' : 'signals');
-  for (const key of signalKeys) {
+  for (const key of event.kind === 'observe' ? ['injection'] : signalKeys) {
     const value = event.signals[key];
     const bar = track(key, value);
     if (mini) {
@@ -224,7 +227,8 @@ function signalBars(event, mini = false) {
 function renderVerdict(event) {
   const grid = node('div', 'result-grid');
   const info = node('div');
-  info.append(node('span', 'eyebrow', 'Latest simulator decision'));
+  const sourceLabel = event.source === 'hook' ? (event.kind === 'observe' ? 'Latest hook content scan' : 'Latest hook decision') : 'Latest simulator decision';
+  info.append(node('span', 'eyebrow', sourceLabel));
   const title = node('div', 'verdict-title');
   title.append(node('div', `big-verdict ${event.verdict}`, event.verdict.toUpperCase()), layerBadge(event.layer));
   const metrics = node('div', 'metrics');
@@ -398,7 +402,10 @@ async function start() {
   stream.onmessage = (messageEvent) => {
     try {
       const event = JSON.parse(messageEvent.data);
-      if (addEvent(event)) void refreshStats();
+      if (addEvent(event)) {
+        if (event.source === 'hook') renderVerdict(event);
+        void refreshStats();
+      }
     } catch { dataError('events', 'An event could not be read; refreshing history.'); void loadEvents(); }
   };
   setInterval(() => {
