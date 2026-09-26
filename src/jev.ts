@@ -1,7 +1,12 @@
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 import { config } from "./config.js";
 
-export const jev = new TypeSafeClient({ defaultModel: config.jevModel, timeout: 6000 });
+let client: TypeSafeClient | undefined;
+
+/** Construct only when a model call is needed; rules and pure policy need no key. */
+export function getJev(): TypeSafeClient {
+  return client ??= new TypeSafeClient({ defaultModel: config.jevModel, timeout: 6000 });
+}
 
 /**
  * One atomic judgment per question, all answered in a single Jev call (speculative fan-out).
