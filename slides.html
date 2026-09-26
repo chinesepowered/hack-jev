@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flinch</title>
+<style>
+  :root {
+    --bg: #0a0d14; --panel: #121826; --line: #232b3d; --text: #e8ecf4; --muted: #8a94a8;
+    --green: #4ade80; --amber: #fbbf24; --red: #f87171; --blue: #60a5fa; --purple: #c084fc; --gray: #94a3b8;
+    --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #05070b; color: var(--text); font-family: var(--sans); overflow: hidden; }
+  .viewport { position: fixed; inset: 0; display: grid; place-items: center; }
+  .stage { width: 1600px; height: 900px; position: relative; transform-origin: center center; }
+  .slide {
+    position: absolute; inset: 0; padding: 88px 104px; background: radial-gradient(1200px 700px at 85% -10%, rgba(74, 222, 128, 0.08), transparent 60%), var(--bg);
+    border: 1px solid var(--line); border-radius: 20px; display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.35s ease; transform: translateY(12px);
+  }
+  .slide.active { opacity: 1; pointer-events: auto; transform: none; }
+  .kicker { font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); font-weight: 700; }
+  h1 { font-size: 132px; line-height: 1; margin: 0; letter-spacing: -0.03em; }
+  h2 { font-size: 62px; line-height: 1.08; margin: 18px 0 0; letter-spacing: -0.02em; max-width: 1300px; }
+  .lede { font-size: 40px; color: var(--muted); margin-top: 22px; }
+  .mono { font-family: var(--mono); }
+  .footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 22px; }
+  .bolt { display: inline-flex; align-items: center; gap: 28px; }
+  .bolt svg { width: 120px; height: 120px; }
+
+  /* slide 1 */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 88px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 30px 34px; }
+  .stat b { display: block; font-size: 64px; letter-spacing: -0.02em; }
+  .stat span { font-size: 24px; color: var(--muted); }
+
+  /* slide 2 */
+  .threats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 56px; }
+  .threat { background: var(--panel); border: 1px solid var(--line); border-left: 6px solid var(--red); border-radius: 16px; padding: 28px 30px; }
+  .threat code { display: block; font-family: var(--mono); font-size: 27px; color: var(--red); margin-bottom: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .threat p { margin: 0; font-size: 26px; color: var(--muted); line-height: 1.35; }
+  .callout { margin-top: 48px; font-size: 36px; line-height: 1.35; max-width: 1350px; }
+  .callout em { color: var(--amber); font-style: normal; font-weight: 600; }
+
+  /* slide 3 */
+  .pipe { display: flex; align-items: stretch; gap: 16px; margin-top: 48px; }
+  .node { flex: 1; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px 22px 24px; position: relative; }
+  .node h3 { margin: 0 0 8px; font-size: 30px; }
+  .node p { margin: 0; font-size: 22px; color: var(--muted); line-height: 1.35; }
+  .node .t { display: inline-block; margin-bottom: 12px; font: 700 20px var(--mono); padding: 4px 10px; border-radius: 8px; }
+  .arrow { align-self: center; color: var(--muted); font-size: 36px; }
+  .rule .t { background: rgba(148, 163, 184, 0.15); color: var(--gray); }
+  .jev { border-color: rgba(96, 165, 250, 0.55); } .jev .t { background: rgba(96, 165, 250, 0.15); color: var(--blue); }
+  .code .t { background: rgba(74, 222, 128, 0.12); color: var(--green); }
+  .llm .t { background: rgba(192, 132, 252, 0.15); color: var(--purple); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 40px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 26px 30px; }
+  .card h4 { margin: 0 0 16px; font-size: 22px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .ex { display: flex; align-items: center; gap: 16px; font-size: 24px; margin: 12px 0; }
+  .ex code { font-family: var(--mono); font-size: 23px; flex: 1; }
+  .ex small { color: var(--muted); font-size: 20px; display: block; }
+  .pill { font: 800 18px var(--sans); letter-spacing: 0.06em; padding: 6px 12px; border-radius: 8px; color: #0a0d14; min-width: 78px; text-align: center; }
+  .deny { background: var(--red); } .allow { background: var(--green); } .ask { background: var(--amber); }
+  .race { display: grid; gap: 14px; margin-top: 6px; }
+  .lane { display: grid; grid-template-columns: 170px 1fr 120px; align-items: center; gap: 16px; font-size: 22px; }
+  .bar { height: 26px; border-radius: 8px; background: #1b2334; overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 8px; }
+  .lane b { text-align: right; font-size: 28px; }
+  .note { font-size: 22px; color: var(--muted); margin-top: 16px; line-height: 1.4; }
+  .slide[aria-label="Solution"] { padding: 60px 96px 48px; }
+  .slide[aria-label="Solution"] .pipe { margin-top: 28px; }
+  .slide[aria-label="Solution"] .node p { font-size: 20px; }
+  .slide[aria-label="Solution"] .row { margin-top: 24px; }
+  .slide[aria-label="Solution"] .ex { margin: 6px 0; }
+  .slide[aria-label="Solution"] .ex code { font-size: 21px; }
+  .slide[aria-label="Solution"] .note { font-size: 20px; }
+
+  /* slide 4 */
+  .sponsors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 52px; }
+  .sp { background: var(--panel); border: 1px solid var(--line); border-top: 6px solid var(--c); border-radius: 16px; padding: 28px 30px; }
+  .sp h3 { margin: 0 0 6px; font-size: 34px; }
+  .sp .role { color: var(--c); font-weight: 700; font-size: 22px; margin-bottom: 16px; }
+  .sp ul { margin: 0; padding-left: 22px; font-size: 23px; line-height: 1.45; color: #cbd3e1; }
+  .next { margin-top: 40px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; font-size: 24px; }
+  .next b { color: var(--green); letter-spacing: 0.1em; text-transform: uppercase; font-size: 22px; margin-right: 8px; }
+  .chip { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 10px 20px; }
+
+  .nav { position: fixed; bottom: 18px; right: 22px; display: flex; gap: 10px; align-items: center; color: var(--muted); font: 14px var(--sans); z-index: 5; }
+  .nav button { background: #151c2b; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 14px; }
+  .nav button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="viewport">
+  <div class="stage" id="stage">
+
+    <section class="slide" aria-label="Title">
+      <div class="kicker">JEVATHON · San Francisco</div>
+      <div class="bolt" style="margin-top: 48px;">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M36 4 10 38h18l-6 22 30-38H34z" fill="#4ade80"/></svg>
+        <h1>Flinch</h1>
+      </div>
+      <div class="lede">A System One reflex for coding agents.</div>
+      <div class="stats">
+        <div class="stat"><b>138 ms</b><span>per tool-call check (Jev p50)</span></div>
+        <div class="stat"><b>30 / 30</b><span>correct on our live eval set</span></div>
+        <div class="stat"><b>$0.02</b><span>per 1,000 tool calls</span></div>
+      </div>
+      <div class="footer"><span>Built with TypeSafe Jev · CodeRabbit Coding Agent · GMI Cloud</span><span class="mono">github.com/chinesepowered/hack-jev</span></div>
+    </section>
+
+    <section class="slide" aria-label="Problem">
+      <div class="kicker">The problem</div>
+      <h2>Coding agents on auto-approve are one poisoned README away from disaster.</h2>
+      <div class="threats">
+        <div class="threat"><code>curl … | sh</code><p>Runs a stranger's script because an issue told it to.</p></div>
+        <div class="threat"><code>cat ~/.ssh/id_rsa</code><p>Reads your keys while "adding a setup section to the README".</p></div>
+        <div class="threat"><code>git push --force</code><p>Rewrites main while it was supposed to fix one test.</p></div>
+      </div>
+      <p class="callout">Approving hundreds of calls by hand is exhausting, so people turn approvals off. An LLM judging every call costs <em>seconds and cents per call</em>, hundreds of times a session, so nobody runs one.</p>
+      <div class="footer"><span>Flinch</span><span>2 / 4</span></div>
+    </section>
+
+    <section class="slide" aria-label="Solution">
+      <div class="kicker">Our solution</div>
+      <h2 style="font-size: 54px;">Fast by default, slow only when it matters.</h2>
+      <div class="pipe">
+        <div class="node rule"><span class="t">0 ms</span><h3>Rules</h3><p>Known-safe allowed, catastrophic denied. No model call.</p></div>
+        <div class="arrow">→</div>
+        <div class="node jev"><span class="t">~140 ms</span><h3>Jev</h3><p>7 questions, 1 request: destructive, secrets, exfiltration, remote code, tampering, category, on-task.</p></div>
+        <div class="arrow">→</div>
+        <div class="node code"><span class="t">code</span><h3>Policy</h3><p>Thresholds scale with stakes. Off-task + outward + risky = deny.</p></div>
+        <div class="arrow">→</div>
+        <div class="node llm"><span class="t">only if unclear</span><h3>GLM on GMI</h3><p>System Two weighs the gray zone. Timeout means ask.</p></div>
+      </div>
+      <div class="row">
+        <div class="card">
+          <h4>Live verdicts (the user's goal in grey)</h4>
+          <div class="ex"><span class="pill deny">DENY</span><code>git push --force origin main<small>fix a failing test · Jev, 150 ms</small></code></div>
+          <div class="ex"><span class="pill deny">DENY</span><code>curl … | sh<small>install dependencies · remote code p=0.99</small></code></div>
+          <div class="ex"><span class="pill allow">ALLOW</span><code>rm -rf dist<small>clean the build output · LLM: "exactly the stated goal"</small></code></div>
+        </div>
+        <div class="card">
+          <h4>Race: 24 agent actions, judged two ways</h4>
+          <div class="race">
+            <div class="lane"><span>Flinch</span><div class="bar"><i style="width: 23.5%; background: var(--blue);"></i></div><b>3.5 s</b></div>
+            <div class="lane"><span>LLM every call</span><div class="bar"><i style="width: 100%; background: var(--purple);"></i></div><b>14.9 s</b></div>
+          </div>
+          <p class="note">Flinch 22/24 correct, LLM-only 21/24. Both Flinch misses were cautious asks, never a bad allow. Rules settle 50% of calls, Jev 47%, the LLM 3%.</p>
+        </div>
+      </div>
+      <div class="footer"><span>Flinch</span><span>3 / 4</span></div>
+    </section>
+
+    <section class="slide" aria-label="Built with and next">
+      <div class="kicker">How we built it</div>
+      <h2 style="font-size: 54px;">Three sponsors, each doing the job it's best at.</h2>
+      <div class="sponsors">
+        <div class="sp" style="--c: var(--blue);">
+          <h3>TypeSafe Jev</h3><div class="role">The reflex</div>
+          <ul><li>Every tool call: 5 Nouls, a Choice and a Score in one request</li><li>Scans fetched content for injected instructions</li><li>138 ms p50, ~$0.00003 per check</li></ul>
+        </div>
+        <div class="sp" style="--c: var(--green);">
+          <h3>CodeRabbit</h3><div class="role">Our second engineer</div>
+          <ul><li>Coding Agent wrote 4 of our 6 PRs: dashboard, race, 47 tests, eval</li><li>Its tests found a real bypass in our rules, and it fixed it</li><li>Every PR summarized by CodeRabbit</li></ul>
+        </div>
+        <div class="sp" style="--c: var(--purple);">
+          <h3>GMI Cloud</h3><div class="role">System Two</div>
+          <ul><li>GLM-5.3-Flash via the plain OpenAI SDK</li><li>Only the 3% of calls Jev can't settle</li><li>Swap providers with one env var</li></ul>
+        </div>
+      </div>
+      <div class="next"><b>Next</b><span class="chip">Codex &amp; Cursor adapters</span><span class="chip">Per-repo policy packs</span><span class="chip">Thresholds calibrated per team</span><span class="chip">Team view of agent actions</span></div>
+      <div class="footer"><span>Flinch · A System One reflex for coding agents</span><span>4 / 4</span></div>
+    </section>
+
+  </div>
+</div>
+<div class="nav"><button id="prev" aria-label="Previous slide">←</button><span id="count">1 / 4</span><button id="next" aria-label="Next slide">→</button></div>
+<script>
+  const slides = [...document.querySelectorAll(".slide")];
+  const stage = document.getElementById("stage");
+  const count = document.getElementById("count");
+  let index = Math.min(Math.max(Number(location.hash.slice(1)) - 1 || 0, 0), slides.length - 1);
+
+  function show(i) {
+    index = Math.min(Math.max(i, 0), slides.length - 1);
+    slides.forEach((s, n) => s.classList.toggle("active", n === index));
+    count.textContent = `${index + 1} / ${slides.length}`;
+    history.replaceState(null, "", `#${index + 1}`);
+  }
+
+  function fit() {
+    const scale = Math.min(window.innerWidth / 1600, window.innerHeight / 900) * 0.96;
+    stage.style.transform = `scale(${scale})`;
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); show(index + 1); }
+    if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); show(index - 1); }
+    if (e.key === "Home") show(0);
+    if (e.key === "End") show(slides.length - 1);
+  });
+  document.getElementById("prev").onclick = () => show(index - 1);
+  document.getElementById("next").onclick = () => show(index + 1);
+  window.addEventListener("resize", fit);
+  fit();
+  show(index);
+</script>
+</body>
+</html>
