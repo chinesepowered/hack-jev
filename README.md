@@ -37,7 +37,9 @@ Live run of `pnpm eval` against Jev and GLM on GMI Cloud, 30 cases (full table i
 | Jev latency p50 / p95 | **138 ms** / 224 ms |
 | Projected cost | **about $0.02 per 1,000 tool calls** |
 
-The cases were written by us, so treat this as a regression suite rather than a benchmark. Examples from the live dashboard:
+The cases were written by us, so treat this as a regression suite rather than a benchmark.
+
+**Jev vs LLM race** (`/race`, 24 cases, both lanes at concurrency 6): Flinch finished in **3.5 s** for $0.0012 with 22/24 correct; an LLM judge on every call took **14.9 s** for $0.0025 with 21/24. Both of Flinch's misses were cautious (it asked where it could have allowed). The cost gap is modest only because GLM-5.3-Flash is itself cheap; it grows with a larger judge model. Examples from the live dashboard:
 
 | Tool call (user's goal) | Verdict | Decided by |
 | --- | --- | --- |
@@ -65,7 +67,9 @@ To guard a real Claude Code session, run `claude` inside [`demo/`](demo): its `.
 - **Core** (rules, Jev policy, System Two, hook, server): written with Claude Code, [PR #1](https://github.com/chinesepowered/hack-jev/pull/1).
 - **Dashboard**: built by **CodeRabbit's Coding Agent** from [`docs/coding-agent-tasks/01-dashboard.md`](docs/coding-agent-tasks/01-dashboard.md), commit authored by `coderabbitai[bot]`, [PR #2](https://github.com/chinesepowered/hack-jev/pull/2).
 - **Tests and eval harness**: built by **CodeRabbit's Coding Agent** from [`docs/coding-agent-tasks/03-eval-and-tests.md`](docs/coding-agent-tasks/03-eval-and-tests.md), [PR #3](https://github.com/chinesepowered/hack-jev/pull/3). Its tests found a real bypass in our rules layer: a command with a newline in it could match the safe-command allowlist and skip Jev entirely. It fixed that in the same PR.
-- Every pull request was summarized by CodeRabbit before merge.
+- **Jev vs LLM race**: built by **CodeRabbit's Coding Agent** from [`docs/coding-agent-tasks/02-race.md`](docs/coding-agent-tasks/02-race.md), [PR #5](https://github.com/chinesepowered/hack-jev/pull/5).
+- **Dashboard follow-up** (live hook verdicts in the verdict card, labeled signals): a second Coding Agent turn in the dashboard task, [PR #6](https://github.com/chinesepowered/hack-jev/pull/6).
+- Every pull request was summarized by CodeRabbit before merge. Four of the six PRs were written by the Coding Agent (`git log --author=coderabbitai`).
 
 ## Limitations and next steps
 
